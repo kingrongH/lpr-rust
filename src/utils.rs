@@ -73,6 +73,21 @@ pub fn argmax_in_axis0(input: &[f32], shape: &[usize]) -> Vec<usize> {
     }).collect()
 }
 
+/// arg max with and keep origin value in pair
+pub fn argmax_in_axis0_pair(input: &[f32], shape: &[usize]) -> Vec<(usize, f32)> {
+    input.chunks(shape[1]).map(|v: &[f32]| {
+        let mut max = v[0];
+        let mut index = 0;
+        v.iter().enumerate().for_each(|(i, v_in_v)| {
+            if *v_in_v >= max {
+                max = *v_in_v;
+                index = i;
+            }
+        });
+        (index, max)
+    }).collect()
+}
+
 
 pub fn transpose(input: &DynamicImage) -> DynamicImage {
     let img = input.to_rgba();

@@ -38,8 +38,8 @@ impl Lpr {
         Ok(Lpr{ detection, ocr, fine_mapping })
     }
 
-    /// Recognize one image
-    pub fn recognize(&self, img: &DynamicImage) -> Result<DynamicImage, LprError> {
+    /// Recognize one image output image
+    pub fn recognize_and_draw(&self, img: &DynamicImage) -> Result<DynamicImage, LprError> {
         let mut detected = img.clone().to_rgb();
 
         let score_needed = 0.6;
@@ -48,7 +48,18 @@ impl Lpr {
             let mut a_box = a_box;
             let [x, y, width, height] = a_box;
             let plate = img.view(x, y, width, height).to_image();
-            let plate = self.fine_mapping_vertical(&DynamicImage::ImageRgba8(plate), &mut a_box)?;
+            let plate = DynamicImage::ImageRgba8(plate);
+            //window::display_image("after fine_mapping plate", &plate.to_rgb(), 500, 500);
+            // perspective transform
+            let plate = match image_process::perspective_trans(&plate.to_rgb()) {
+                Some(p) => DynamicImage::ImageRgb8(p),
+                None => {
+                    println!("Don't perform perspective transform because cannot create projection from those points");
+                    let plate = self.fine_mapping_vertical(&plate, &mut a_box)?;
+                    plate
+                },
+            };
+            window::display_image("plate", &plate.to_rgb(), 500, 500);
             let (ocr_res, ocr_score) = self.get_ocr_result(&plate)?;
             let [x, y, width, height] = a_box;
             let rect = rect::Rect::at(x as i32, y as i32).of_size(width, height);
@@ -56,10 +67,35 @@ impl Lpr {
             let text = format!("{}--{}", ocr_res, ocr_score);
             let font = Font::from_bytes(FONT_DATA)?;
             let scale = Scale::uniform(24.0);
-            drawing::draw_text_mut(&mut detected, image::Rgb([255, 0, 0]), x, y, scale, &font, &text);
+            drawing::draw_text_mut(&mut detected, image::Rgb([0, 255, 0]), x, y, scale, &font, &text);
         }
         
         Ok(DynamicImage::ImageRgb8(detected))
+    }
+
+    /// Recognize and return vec of rect and format str with result in it
+    pub fn recognize(&self, img: &DynamicImage) -> Result<Vec<([u32; 4], String, f32)>, LprError> {
+        let score_needed = 0.6;
+        let boxes_and_scores = self.get_boxes_and_scores(img, score_needed)?;
+        let result: Result<Vec<([u32; 4], String, f32)>, LprError> = boxes_and_scores.into_iter().map(|(a_box, _)| {
+            let mut a_box = a_box;
+            let [x, y, width, height] = a_box;
+            let plate = img.view(x, y, width, height).to_image();
+            let plate = DynamicImage::ImageRgba8(plate);
+            //window::display_image("after fine_mapping plate", &plate.to_rgb(), 500, 500);
+            // perspective transform
+            let plate = match image_process::perspective_trans(&plate.to_rgb()) {
+                Some(p) => DynamicImage::ImageRgb8(p),
+                None => {
+                    println!("Don't perform perspective transform because cannot create projection from those points");
+                    let plate = self.fine_mapping_vertical(&plate, &mut a_box)?;
+                    plate
+                },
+            };
+            let (ocr_res, ocr_score) = self.get_ocr_result(&plate)?;
+            Ok((a_box, ocr_res, ocr_score))
+        }).collect();
+        result
     }
     
     /// get boxes and scores
@@ -90,7 +126,7 @@ impl Lpr {
         Ok(detect_res)
     }
     
-
+    /// get ocr result from a image using a trained model
     pub fn get_ocr_result(&self, img: &DynamicImage) -> Result<(String, f32), LprError> {
         let img = utils::equalize_hist_in_gray(&img);
 
@@ -141,12 +177,42 @@ impl Lpr {
     }
     
     fn fast_decode(ocr_res: &[f32], shape: [usize; 2]) -> (String, f32){
-        let argmax = utils::argmax_in_axis0(ocr_res, &shape);
-        let (res, mut confidence) = argmax.iter().enumerate().skip(1).filter(|(i, v)| {
-            **v < CHARS.len() && **v != argmax[i-1]
-        }).fold((Vec::new(), 0.0), |(mut res, mut confidence), (i, v)| {
-            res.push(CHARS[*v]);
-            confidence += ocr_res[i*shape[1] + v];
+        //let argmax = utils::argmax_in_axis0(ocr_res, &shape);
+        //let (res, mut confidence) = argmax.iter().enumerate().skip(1).filter(|(i, v)| {
+            //**v < CHARS.len() && **v != argmax[i-1]
+        //}).fold((Vec::new(), 0.0), |(mut res, mut confidence), (i, v)| {
+            //res.push(CHARS[*v]);
+            //confidence += ocr_res[i*shape[1] + v];
+            //(res, confidence)
+        //});
+        
+        let argmax = utils::argmax_in_axis0_pair(ocr_res, &shape);
+        let res = argmax.iter().enumerate().filter(|(i, (ocr_index, _))| {
+            if *i != 0 {
+                let (last_index, _) = argmax[*i - 1];
+                return *ocr_index < CHARS.len() && *ocr_index != last_index;
+            }
+            return *ocr_index < CHARS.len();
+        }).enumerate().fold(Vec::new(), |mut res: Vec<(usize, f32)>, (i, (_, (ocr_index, ocr_confidence)))| {
+            // first chinese handling, if there is multiple chinese result, pick the one with
+            // higher confidence
+            if i != 0 {
+                if *ocr_index > 0 && *ocr_index < 31 {
+                    if *ocr_confidence >= res[0].1 {
+                        res[0] = (*ocr_index, *ocr_confidence);
+                        return res;
+                    } else {
+                        return res;
+                    }
+                }
+            }
+            res.push((*ocr_index, *ocr_confidence));
+            res
+        });
+        let (res, mut confidence) = res.iter()
+            .fold((Vec::new(), 0.0), |(mut res, mut confidence), (ocr_index, ocr_confidence)| {
+            res.push(CHARS[*ocr_index]);
+            confidence += ocr_confidence;
             (res, confidence)
         });
         confidence = confidence/res.len() as f32;
@@ -232,7 +298,6 @@ impl LprPart {
         let output_name = self.output_name;
         let mut args = SessionRunArgs::new();
         args.add_feed(&graph.operation_by_name_required(input_name)?, 0, &input);
-        //let res = args.request_fetch(&graph.operation_by_name_required("relu4/Relu")?, 0);
         let res = args.request_fetch(&graph.operation_by_name_required(output_name)?, 0);
         session.run(&mut args)?;
         let res: Tensor<f32> = args.fetch(res)?;

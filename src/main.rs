@@ -21,7 +21,7 @@ fn main() -> Result<(), Box<dyn Error>>{
     let img = image::open(file_name)?;
 
     let lpr = Lpr::new("./models/detect.pb", "./models/ocr_plate_all_gru.pb", "./models/fine_mapping.pb")?;
-    let res_img = lpr.recognize(&img)?;
+    let res_img = lpr.recognize_and_draw(&img)?;
     window::display_image("res", &res_img.to_rgba(), 700, 700);
 
     Ok(())
