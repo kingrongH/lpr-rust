@@ -10,7 +10,7 @@ edition = "2018"
 gtk-display = ["gtk", "gio", "gdk-pixbuf"]
 
 [dependencies]
-tensorflow = { git = "https://github.com/kingrongH/tensorflow-rust", branch = "v1.14.0", features = ["experimental_training"] }
+tensorflow = { version = "0.15.0", features = ["experimental_training"] }
 image = "0.23.0"
 imageproc = { git = "https://github.com/image-rs/imageproc", features = ["display-window"] }
 palette = "0.5.0"
