@@ -1,5 +1,5 @@
-use imageproc::{ window, drawing, rect };
-use image::{ DynamicImage, GenericImageView };
+use imageproc::window;
+use image::GenericImageView;
 
 use std::error::Error;
 use std::env::args;
@@ -20,7 +20,7 @@ fn main() -> Result<(), Box<dyn Error>> {
     };
     
     let lpr = Lpr::new("../models/detect.pb", "../models/ocr_plate_all_gru.pb", "../models/fine_mapping.pb")?;
-    let mut img = image::open(path)?;
+    let img = image::open(path)?;
     let (width, height) = img.dimensions();
     let mut rect = [0, 0, width, height];
     window::display_image("原图", &img.to_rgb(), width, height);

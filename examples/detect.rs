@@ -1,10 +1,8 @@
 use imageproc::{ window, drawing, rect };
-use image::{ DynamicImage, GenericImageView };
+use image::GenericImageView;
 use rusttype::{ Font, Scale };
 
 use std::error::Error;
-use std::fs::File;
-use std::io::prelude::*;
 use std::env::args;
 use std::process;
 

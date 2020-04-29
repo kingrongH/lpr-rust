@@ -1,11 +1,7 @@
-use imageproc::{ window, drawing, rect };
-use image::{ DynamicImage, GenericImageView };
-use rusttype::{ Font, Scale };
-
 use std::error::Error;
 use std::env::args;
 use std::process;
-use std::time::{SystemTime, Duration};
+use std::time::SystemTime;
 
 use lpr_rust::Lpr;
 

@@ -7,10 +7,9 @@ use gdk_pixbuf::{ Pixbuf, Colorspace };
 #[cfg(feature = "gtk-display")]
 use gio::prelude::*;
 
-use image::{ DynamicImage, GenericImage, GenericImageView, ImageBuffer, Luma };
-use tensorflow::{ Graph, Tensor, ImportGraphDefOptions };
+use image::{ DynamicImage, GenericImage, ImageBuffer, Luma };
+use tensorflow::{ Graph, ImportGraphDefOptions };
 
-use std::env;
 use std::fs::File;
 use std::path::Path;
 use std::io::prelude::*;

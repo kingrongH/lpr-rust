@@ -1,4 +1,4 @@
-use tensorflow::{ Tensor, Session, SessionOptions, Graph, SessionRunArgs, ImportGraphDefOptions, TensorType };
+use tensorflow::{ Tensor, Session, SessionOptions, Graph, SessionRunArgs, ImportGraphDefOptions };
 use image::{ GenericImageView, imageops::FilterType, DynamicImage };
 use imageproc::{ drawing, rect, filter, contrast, window };
 use rusttype::{ Font, Scale };
@@ -307,10 +307,12 @@ impl LprPart {
 
 
 #[cfg(test)]
+#[allow(unused_imports)]
+#[allow(dead_code)]
 mod test {
     
     use image::{DynamicImage, ImageBuffer, Rgb, imageops::FilterType };
-    use tensorflow::{ Tensor };
+    use tensorflow::Tensor;
 
     use std::error::Error;
     use std::fs::File;

@@ -1,15 +1,12 @@
 /// This file contains function to do perspective transformation and some gradient and canny
 /// calculation. But now only perspective transformation functions are needed
 
-use image::{ DynamicImage, GrayImage, Rgb, RgbImage, GenericImage, GenericImageView, imageops };
-use imageproc::{ filter, edges, stats, corners, morphology, distance_transform::Norm,
-    geometric_transformations::{self, Interpolation}, contrast, hough, hough::PolarLine, window};
-use palette::{ Hsv, Srgb, Pixel, rgb::RgbStandard };
+use image::{ DynamicImage, Rgb, RgbImage };
+use imageproc::{ filter, edges, morphology, distance_transform::Norm,
+    geometric_transformations::{self, Interpolation}, hough, hough::PolarLine };
+use palette::{ Hsv, Srgb, Pixel };
 
-use std::error::Error;
 use std::cmp::Ordering;
-
-const NORM_BLUE_PLATE_RATIO: f32 = 3.1428;
 
 /// Perform perspective transformation for a oblique image, return None when projection cannot be
 /// created
