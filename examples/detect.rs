@@ -22,7 +22,7 @@ fn main() -> Result<(), Box<dyn Error>> {
         }
     };
 
-    let lpr = Lpr::new("../models/detect.pb", "../models/ocr_plate_all_gru.pb", "../models/fine_mapping.pb")?;
+    let lpr = Lpr::new("./models/detect.pb", "./models/ocr_plate_all_gru.pb", "./models/fine_mapping.pb")?;
     let mut img = image::open(path)?;
     let (width, height) = img.dimensions();
     let res = lpr.get_boxes_and_scores(&img, 0.8)?;
