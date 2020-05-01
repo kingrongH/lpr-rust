@@ -22,7 +22,7 @@ cargo run ./test_images/1.jpg
 ```
 
 Then you could see something like this:
-![recognition](https://sm.ms/image/hLlxqUCVkDM8wAs)
+![recognition](https://i.loli.net/2020/05/01/hLlxqUCVkDM8wAs.png)
 
 ### lib
 
@@ -62,7 +62,7 @@ example for checking out examples
 cargo run --example detect test_images/2.jpg
 ```
 
-![detect example](https://sm.ms/image/SWtMalhNILJmAfP)
+![detect example](https://i.loli.net/2020/05/01/SWtMalhNILJmAfP.png)
 
 
 ## How
@@ -89,7 +89,7 @@ The main problem that I encoutered is how to fix oblique plate in image detected
 
 Here is an image you may want to see how do I do this:
 
-![image processing](https://sm.ms/image/dt7aWonlE5YSkGK)
+![image processing](https://i.loli.net/2020/05/01/dt7aWonlE5YSkGK.png)
 
 If you found a better way, please let me know.
 
