@@ -4,7 +4,7 @@ A Chinese license plate regognition implemention in rust. This repo use:
 
 1. [image](https://github.com/image-rs/image) and [impageproc](https://github.com/image-rs/imageproc) for image processing
 2. [tensorflow-rust](https://github.com/tensorflow/rust) for machine learning
-3. some pre-trained model from [HyperLPR](https://github.com/zeusees/HyperLPR)
+3. some pre-trained model and fonts from [HyperLPR](https://github.com/zeusees/HyperLPR)
 4. all the images for training and test comes from [CCPD](https://github.com/detectRecog/CCPD)
 
 ## Quick Start
@@ -22,6 +22,7 @@ cargo run ./test_images/1.jpg
 ```
 
 Then you could see something like this:
+ 
 ![recognition](https://i.loli.net/2020/05/01/hLlxqUCVkDM8wAs.png)
 
 ### lib
@@ -100,6 +101,13 @@ I use a keras model(ocr_plate_all_gru) from [HyperLPR](https://github.com/zeusee
 But in Rust you don't have way to load keras model, so the thing i do is convert keras model to tensorflow model, then load this model to recognize.
 
 Here is a [blog](https://www.dlology.com/blog/how-to-convert-trained-keras-model-to-tensorflow-and-make-prediction/) found on internet, maybe you can take a look.
+
+## License
+
+Code part is under either MIT License or Apache 2.0 License at your option.
+
+Models, images and font is under the License of original repo.
+
 
 ## Known issue
 
